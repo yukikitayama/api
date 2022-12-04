@@ -55,6 +55,12 @@ def get_steps(start, end):
     for step in collection.find(filter_, projection):
         index = step['activities-steps'][0]['dateTime']
         value = int(step['activities-steps'][0]['value'])
+        
+        # When recoding of steps was not successful, 0 steps is saved
+        # but it's impossible, so set a missing value
+        if value == 0:
+            value = None
+        
         body.append({
             'index': index,
             'value': value
@@ -180,25 +186,25 @@ if __name__ == '__main__':
             'end': '2022-12-01'
         }
     }
-    event = {
-        'queryStringParameters': {
-            'data': 'weight',
-            'start': '2022-11-01',
-            'end': '2022-12-01'
-        }
-    }
-    event = {
-        'queryStringParameters': {
-            'data': 'sleep',
-            'start': '2022-11-01',
-            'end': '2022-12-01'
-        }
-    }
-    event = {
-        'queryStringParameters': {
-            'data': 'deep-sleep',
-            'start': '2022-11-01',
-            'end': '2022-12-01'
-        }
-    }
+    # event = {
+    #     'queryStringParameters': {
+    #         'data': 'weight',
+    #         'start': '2022-11-01',
+    #         'end': '2022-12-01'
+    #     }
+    # }
+    # event = {
+    #     'queryStringParameters': {
+    #         'data': 'sleep',
+    #         'start': '2022-11-01',
+    #         'end': '2022-12-01'
+    #     }
+    # }
+    # event = {
+    #     'queryStringParameters': {
+    #         'data': 'deep-sleep',
+    #         'start': '2022-11-01',
+    #         'end': '2022-12-01'
+    #     }
+    # }
     pprint.pprint(lambda_handler(event, ''))
