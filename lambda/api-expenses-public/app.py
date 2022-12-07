@@ -157,7 +157,7 @@ def get_expenses_by_category(start, end):
     return expenses
 
 
-def lambda_handler(event, context):
+def handler(event, context):
     
     method = event['httpMethod']
     
@@ -166,7 +166,11 @@ def lambda_handler(event, context):
     # Getting expense data
     if method == 'GET':
         
-        params = event['queryStringParameters'] if 'queryStringParameters' in event else {}
+        params = {}
+        # When no parameters are passed, event['queryStringParameters'] is None 
+        # from API Gateway
+        if 'queryStringParameters' in event and event['queryStringParameters'] is not None:
+            params = event['queryStringParameters']
 
         # Get single expense data by ID
         if 'id' in params:
@@ -245,4 +249,8 @@ if __name__ == '__main__':
             'end': '2022-12-05'
         }
     }
-    pprint.pprint(lambda_handler(event, None))
+    event = {
+        'httpMethod': 'GET',
+        'queryStringParameters': None
+    }
+    pprint.pprint(handler(event, None))
