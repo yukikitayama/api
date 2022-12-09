@@ -74,7 +74,7 @@ def get_daily_expenses(start, end):
             '_id': {
                 'date': { '$dateToString': { 'format': '%Y-%m-%d', 'date': '$convertedDate' } }
             },
-            'totalExpense': { '$sum': '$amount' }
+            'value': { '$sum': '$amount' }
         } },
         # Sort by calendar
         { '$sort': { '_id.date': 1 } }
@@ -83,9 +83,9 @@ def get_daily_expenses(start, end):
     expenses = []
     for expense in collection.aggregate(pipeline):
         date = expense['_id']['date']
-        expense['date'] = date
+        expense['index'] = date
         del expense['_id']
-        expense['totalExpense'] = round(expense['totalExpense'], 2)
+        expense['value'] = round(expense['value'], 2)
         expenses.append(expense)
     
     return expenses
@@ -106,7 +106,7 @@ def get_monthly_expenses(start, end):
                 'year': { '$year': '$convertedDate' },
                 'month': { '$month': '$convertedDate' }
             },
-            'totalExpense': { '$sum': '$amount' }
+            'value': { '$sum': '$amount' }
         } },
         # Sort by calendar
         { '$sort': { '_id.year': 1, '_id.month': 1 } }
@@ -116,9 +116,9 @@ def get_monthly_expenses(start, end):
     for expense in collection.aggregate(pipeline):
         year = expense['_id']['year']
         month = expense['_id']['month']
-        expense['yearMonth'] = f'{year}-0{month}' if month < 10 else f'{year}-{month}'
+        expense['index'] = f'{year}-0{month}' if month < 10 else f'{year}-{month}'
         del expense['_id']
-        expense['totalExpense'] = round(expense['totalExpense'], 2)
+        expense['value'] = round(expense['value'], 2)
         expenses.append(expense)
     
     return expenses
@@ -151,8 +151,8 @@ def get_expenses_by_category(start, end):
         if i >= CATEGORY_NUM:
             other += amount
         else:
-            expenses.append({ 'category': category, 'expense': amount })
-    expenses.append({ 'category': 'other', 'expense': other})
+            expenses.append({ 'index': category, 'value': amount })
+    expenses.append({ 'index': 'other', 'value': round(other, 2)})
 
     return expenses
 
@@ -245,12 +245,12 @@ if __name__ == '__main__':
         'httpMethod': 'GET',
         'queryStringParameters': {
             'aggregation': 'category',
-            'start': '2022-10-01',
-            'end': '2022-12-05'
+            'start': '2022-09-01',
+            'end': '2022-11-30'
         }
     }
-    event = {
-        'httpMethod': 'GET',
-        'queryStringParameters': None
-    }
+    # event = {
+    #     'httpMethod': 'GET',
+    #     'queryStringParameters': None
+    # }
     pprint.pprint(handler(event, None))
