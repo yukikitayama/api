@@ -104,7 +104,7 @@ def delete_document(event):
     print(f'delete_one() result.deleted_count: {result.deleted_count}')
 
 
-def lambda_handler(event, context):
+def handler(event, context):
     
     method = event['httpMethod']
     
@@ -118,13 +118,13 @@ def lambda_handler(event, context):
     elif method == 'PUT':
         
         update_document(event)
-        body = f'Updated the expense data of ID: {event["body"]["id"]}'
+        body = f'Updated the expense data of ID: {json.loads(event["body"])["id"]}'
     
     # If deleting an existing expense
     elif method == 'DELETE':
         
         delete_document(event)
-        body = f'Delete the expense data of ID: {event["body"]["id"]}'
+        body = f'Delete the expense data of ID: {json.loads(event["body"])["id"]}'
     
     return {
         'statusCode': 200,
@@ -135,4 +135,4 @@ def lambda_handler(event, context):
 
 if __name__ == '__main__':
     event = {}
-    pprint.pprint(lambda_handler(event, None))
+    pprint.pprint(handler(event, None))
