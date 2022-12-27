@@ -1,6 +1,7 @@
 from pymongo import MongoClient
 from bson import json_util
 from bson.objectid import ObjectId
+import pandas as pd
 import boto3
 from datetime import datetime
 import json
@@ -80,14 +81,52 @@ def get_daily_expenses(start, end):
         { '$sort': { '_id.date': 1 } }
     ]
     
+    # Make a list of date strings because the above query doesn't give us 
+    # a value for a date when no expense happened, but I want API to
+    # return daily amount 0 for such a date
+    dates = [d.strftime('%Y-%m-%d') for d in pd.date_range(start=start, end=end, freq='D')]
+    i = 0
+    
     expenses = []
     for expense in collection.aggregate(pipeline):
-        date = expense['_id']['date']
-        expense['index'] = date
-        del expense['_id']
-        expense['value'] = round(expense['value'], 2)
-        expenses.append(expense)
+        index = expense['_id']['date']
+        value = round(expense['value'], 2)
+
+        if index == dates[i]:
+            expenses.append({
+                'index': index,
+                'value': value
+            })
+
+        else:
+            # Keep adding daily expense 0 while MongoDB didn't give us a date without daily sum
+            while index != dates[i]:
+                expenses.append({
+                    'index': dates[i],
+                    'value': 0
+                })
+                i += 1
+            
+            # After imputing missing daily sum, append current daily sum
+            expenses.append({
+                'index': index,
+                'value': value
+            })
+
+        # Iterate to the next index
+        i += 1
     
+    # Here index contains the final date value from MongoDB
+    # Keep adding daily expense 0 when the final data in MongoDB is 
+    # less than the end date parameter
+    if index != dates[-1]:
+        while i < len(dates):
+            expenses.append({
+                'index': dates[i],
+                'value': 0
+            })
+            i += 1
+
     return expenses
 
 
@@ -253,4 +292,12 @@ if __name__ == '__main__':
     #     'httpMethod': 'GET',
     #     'queryStringParameters': None
     # }
+    event = {
+        'httpMethod': 'GET',
+        'queryStringParameters': {
+            'aggregation': 'daily',
+            'start': '2022-12-07',
+            'end': '2022-12-22'
+        }
+    }
     pprint.pprint(handler(event, None))
