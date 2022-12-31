@@ -1,6 +1,7 @@
 from pymongo import MongoClient
 from bson import json_util
 from bson.objectid import ObjectId
+import redis
 import pandas as pd
 import boto3
 from datetime import datetime
@@ -8,11 +9,14 @@ import json
 import pprint
 
 
-SECRET_ID = 'mongodb-website'
+SECRET_ID_01 = 'mongodb-website'
+SECRET_ID_02 = 'redis'
 REGION_NAME = 'us-west-1'
 DATABASE = 'db-react'
 COLLECTION = 'expense'
 CATEGORY_NUM = 7
+EXPIRE_SECOND_REDIS_01 = 60 * 60 * 24 * 7  # 1 week
+EXPIRE_SECOND_REDIS_02 = 60 * 60 * 24  # 1 day
 
 
 def get_secret(secret_id: str, region_name: str) -> dict:
@@ -25,15 +29,28 @@ def get_secret(secret_id: str, region_name: str) -> dict:
 
 
 # Get secrets
-secret_mongodb = get_secret(secret_id=SECRET_ID, region_name=REGION_NAME)
-cluster = secret_mongodb['mongodb-cluster']
-username = secret_mongodb['mongodb-username']
-password = secret_mongodb['mongodb-password']
+secret_mongodb = get_secret(secret_id=SECRET_ID_01, region_name=REGION_NAME)
+cluster_mongodb = secret_mongodb['mongodb-cluster']
+username_mongodb = secret_mongodb['mongodb-username']
+password_mongodb = secret_mongodb['mongodb-password']
+
+secret_redis = get_secret(secret_id=SECRET_ID_02, region_name=REGION_NAME)
+host_redis = secret_redis['host']
+port_redis = secret_redis['port']
+password_redis = secret_redis['password']
 
 # MongoDB client
-host = f'mongodb+srv://{username}:{password}@{cluster}/{DATABASE}?retryWrites=true&w=majority'
-client = MongoClient(host)
+host_mongodb = f'mongodb+srv://{username_mongodb}:{password_mongodb}@{cluster_mongodb}/{DATABASE}?retryWrites=true&w=majority'
+client = MongoClient(host_mongodb)
 collection = client[DATABASE][COLLECTION]
+
+# Redis client
+r = redis.Redis(
+    host=host_redis,
+    port=port_redis,
+    password=password_redis,
+    decode_responses=True
+)
 
 
 def get_single_expense(id_):
@@ -231,21 +248,80 @@ def handler(event, context):
             
             # Monthly
             elif aggregation == 'monthly':
+                
+                # Return cache if it exists
+                cache = r.get(f'api:expenses:monthly:{start}:{end}')
+                if cache:
+                    print('Return the cached result')
+                    
+                    return {
+                        'statusCode': 200,
+                        'headers': {'Access-Control-Allow-Origin': '*'},
+                        'body': cache
+                    }
+                
                 body = get_monthly_expenses(start, end)
+                
+                # Save cache
+                r.set(
+                    name=f'api:expenses:monthly:{start}:{end}',
+                    value=json.dumps(body),
+                    ex=EXPIRE_SECOND_REDIS_02
+                )
                 
             # TODO: Monthly by normal and special
 
             # By category
             elif aggregation == 'category':
+                
+                # Return cache if it exists
+                cache = r.get(f'api:expenses:category:{start}:{end}')
+                if cache:
+                    print('Return the cached result')
+                    
+                    return {
+                        'statusCode': 200,
+                        'headers': {'Access-Control-Allow-Origin': '*'},
+                        'body': cache
+                    }
+                
                 body = get_expenses_by_category(start, end)
+                
+                # Save cache
+                r.set(
+                    name=f'api:expenses:category:{start}:{end}',
+                    value=json.dumps(body),
+                    ex=EXPIRE_SECOND_REDIS_02
+                )
             
         # TODO: Get paginated data
         
         # Get all expense data
         else:
+            
+            # Return cache if it exists
+            cache = r.get(f'api:expenses')
+            if cache:
+                print('Return the cached result')
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Access-Control-Allow-Origin': '*'},
+                    'body': cache
+                }
+            
             body = get_all_expenses()
+            
+            # Save cache
+            r.set(
+                name=f'api:expenses',
+                value=json.dumps(body),
+                ex=EXPIRE_SECOND_REDIS_01
+            )
     
     body = json.dumps(body)
+    
+    print('Saved cache and return the latest data')
     
     return {
         'statusCode': 200,
@@ -292,12 +368,13 @@ if __name__ == '__main__':
     #     'httpMethod': 'GET',
     #     'queryStringParameters': None
     # }
-    event = {
-        'httpMethod': 'GET',
-        'queryStringParameters': {
-            'aggregation': 'daily',
-            'start': '2022-12-07',
-            'end': '2022-12-22'
-        }
-    }
+    # event = {
+    #     'httpMethod': 'GET',
+    #     'queryStringParameters': {
+    #         'aggregation': 'daily',
+    #         'start': '2022-12-07',
+    #         'end': '2022-12-22'
+    #     }
+    # }
     pprint.pprint(handler(event, None))
+    # handler(event, None)
