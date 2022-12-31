@@ -8,8 +8,10 @@ import pprint
 SECRET_ID_01 = 'redis'
 SECRET_ID_02 = 'mongodb-website'
 REGION_NAME = 'us-west-1'
-DATABASE = 'article'
-COLLECTION = 'technical'
+# DATABASE = 'article'
+DATABASE = 'redis'
+# COLLECTION = 'technical'
+COLLECTION = 'article'
 
 
 def get_secret(secret_id: str, region_name: str) -> dict:
@@ -52,13 +54,17 @@ def main():
     # Get data from Redis
     documents = []
     for key in r.keys('article:*'):
-        if key != 'article:':
-            value = r.hgetall(key)
-            if 'image' in value and 'content' not in value:
-                documents.append(value)
+        
+        # if key != 'article:':
+        #     value = r.hgetall(key)
+        #     if 'image' in value and 'content' not in value:
+        #         documents.append(value)
+    
+        value = r.hgetall(key)
+        documents.append(value)
                 
     print(f'Number of documents: {len(documents)}')
-    pprint.pprint(documents)
+    # pprint.pprint(documents)
     
     # MongoDB client
     host_mongodb = f'mongodb+srv://{username_mongodb}:{password_mongodb}@{cluster_mongodb}/{DATABASE}?retryWrites=true&w=majority'
