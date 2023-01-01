@@ -1,12 +1,14 @@
 from pymongo import MongoClient
 from bson.objectid import ObjectId
+import redis
 import boto3
 from datetime import datetime
 import json
 import pprint
 
 
-SECRET_ID = 'mongodb-website'
+SECRET_ID_01 = 'mongodb-website'
+SECRET_ID_02 = 'redis'
 REGION_NAME = 'us-west-1'
 DATABASE = 'db-react'
 COLLECTION = 'expense'
@@ -22,15 +24,28 @@ def get_secret(secret_id: str, region_name: str) -> dict:
 
 
 # Get secrets
-secret_mongodb = get_secret(secret_id=SECRET_ID, region_name=REGION_NAME)
-cluster = secret_mongodb['mongodb-cluster']
-username = secret_mongodb['mongodb-username']
-password = secret_mongodb['mongodb-password']
+secret_mongodb = get_secret(secret_id=SECRET_ID_01, region_name=REGION_NAME)
+cluster_mongodb = secret_mongodb['mongodb-cluster']
+username_mongodb = secret_mongodb['mongodb-username']
+password_mongodb = secret_mongodb['mongodb-password']
+
+secret_redis = get_secret(secret_id=SECRET_ID_02, region_name=REGION_NAME)
+host_redis = secret_redis['host']
+port_redis = secret_redis['port']
+password_redis = secret_redis['password']
 
 # MongoDB client
-host = f'mongodb+srv://{username}:{password}@{cluster}/{DATABASE}?retryWrites=true&w=majority'
-client = MongoClient(host)
+host_mongodb = f'mongodb+srv://{username_mongodb}:{password_mongodb}@{cluster_mongodb}/{DATABASE}?retryWrites=true&w=majority'
+client = MongoClient(host_mongodb)
 collection = client[DATABASE][COLLECTION]
+
+# Redis client
+r = redis.Redis(
+    host=host_redis,
+    port=port_redis,
+    password=password_redis,
+    decode_responses=True
+)
 
 
 def add_document(event):
@@ -108,6 +123,8 @@ def handler(event, context):
     
     method = event['httpMethod']
     
+    body = 'Placeholder'
+    
     # If uploading a new expense
     if method == 'POST':
         
@@ -126,6 +143,12 @@ def handler(event, context):
         delete_document(event)
         body = f'Delete the expense data of ID: {json.loads(event["body"])["id"]}'
     
+    # Invalidate cache in Redis 
+    # because expense table and aggregation needs the updated expense data
+    for key in r.keys('api:expenses*'):
+        r.delete(key)
+    print('Deleted all the cache of api:expenses*')
+    
     return {
         'statusCode': 200,
         'headers': {'Access-Control-Allow-Origin': '*'},
@@ -134,5 +157,8 @@ def handler(event, context):
 
 
 if __name__ == '__main__':
-    event = {}
+    # event = {}
+    event = {
+        'httpMethod': 'PATCH'
+    }
     pprint.pprint(handler(event, None))
