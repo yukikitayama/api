@@ -1,3 +1,4 @@
 env/
 lambda/*/*.zip
 lambda/*/package
+yuki-kitayama-api.json
