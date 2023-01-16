@@ -1,7 +1,9 @@
 from google.cloud import bigquery
 from google.oauth2 import service_account
 from sklearn.linear_model import LinearRegression
+import redis
 import pandas as pd
+import boto3
 import json
 from typing import List
 import pprint
@@ -10,6 +12,9 @@ pd.set_option('display.max_rows', None)
 pd.set_option('expand_frame_repr', False)
 
 
+SECRET_ID = 'redis'
+REGION_NAME = 'us-west-1'
+EXPIRE_SECOND_REDIS = 60 * 60 * 24 * 7  # 1 week
 FILENAME ='./yuki-kitayama-api.json'
 CATEGORY_TO_TAGS = {
     'programming-language': [
@@ -30,6 +35,30 @@ CATEGORY_TO_TAGS = {
 }
 YEAR = 5
 ROUND = 6
+
+
+def get_secret(secret_id: str, region_name: str) -> dict:
+    session = boto3.session.Session()
+    client = session.client(service_name='secretsmanager', region_name=region_name)
+    content = client.get_secret_value(SecretId=secret_id)
+    secret_string = content['SecretString']
+    secret = json.loads(secret_string)
+    return secret
+
+
+# Get secrets
+secret_redis = get_secret(secret_id=SECRET_ID, region_name=REGION_NAME)
+host_redis = secret_redis['host']
+port_redis = secret_redis['port']
+password_redis = secret_redis['password']
+
+# Redis client
+r = redis.Redis(
+    host=host_redis,
+    port=port_redis,
+    password=password_redis,
+    decode_responses=True
+)
 
 
 def get_data(tags: List[str]) -> pd.DataFrame:
@@ -147,43 +176,52 @@ def handler(event, context):
     print(f'category: {category}, type: {type_}')
     
     # Return the cache if it exists in Redis
+    cache = r.get(f'api:analytics:tech:{category}:{type_}')
+    if cache:
+        
+        print('Return the cached data')
+        
+        return {
+            'statusCode': 200,
+            'headers': {'Access-Control-Allow-Origin': '*'},
+            'body': cache
+        }
     
     # Get data
     tags = CATEGORY_TO_TAGS[category]
     df = get_data(tags=tags)
     
-    # Apply analytics
-    
     if type_ == 'time-series':
         
         body = []
-        
         for _, row in df.iterrows():
             body.append({
                 'index': row['index'],
                 'tag': row['tag'],
                 'proportion': round(row['proportion'], ROUND)
             })
-        
         body = json.dumps(body)
-        
-        return {
-            'statusCode': 200,
-            'headers': {'Access-Control-Allow-Origin': '*'},
-            'body': body
-        }
-            
+    
+    # Apply analytics         
     elif type_ == 'scatter':
         
         body = compute_growth_and_popularity(df, tags)
-        
         body = json.dumps(body)
 
-        return {
-            'statusCode': 200,
-            'headers': {'Access-Control-Allow-Origin': '*'},
-            'body': body
-        }
+    # Save cache
+    r.set(
+        name=f'api:analytics:tech:{category}:{type_}',
+        value=body,
+        ex=EXPIRE_SECOND_REDIS
+    )
+    
+    print('Saved cache and return the latest data')
+
+    return {
+        'statusCode': 200,
+        'headers': {'Access-Control-Allow-Origin': '*'},
+        'body': body
+    }
 
 
 if __name__ == '__main__':
