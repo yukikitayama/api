@@ -19,12 +19,18 @@ FILENAME ='./yuki-kitayama-api.json'
 CATEGORY_TO_TAGS = {
     'programming-language': [
         'python', 'javascript', 'typescript',
-        'java', 'scala', 'kotlin', 'c++', 'c#', 'ruby', 'go',
-        'dart', 'swift'
+        'java', 'c++', 'c#', 
+        # 'go',
+        'scala',
+        'r',
+        # 'kotlin', 
+        # 'ruby',
+        # 'swift',
+        'dart'
     ],
     'frontend': [
         'reactjs', 'angular', 'vue.js',
-        'next.js', 'flutter',
+        'next.js', 'flutter', 'react-native',
         'django', 'gatsby'
     ],
     'database': [
@@ -237,28 +243,28 @@ if __name__ == '__main__':
     #         'type': 'time-series'
     #     }
     # }
+    event = {
+        'queryStringParameters': {
+            'category': 'programming-language',
+            'type': 'scatter'
+        }
+    }
     # event = {
     #     'queryStringParameters': {
-    #         'category': 'programming-language',
+    #         'category': 'database',
     #         'type': 'scatter'
     #     }
     # }
-    event = {
-        'queryStringParameters': {
-            'category': 'database',
-            'type': 'scatter'
-        }
-    }
-    event = {
-        'queryStringParameters': {
-            'category': 'frontend',
-            'type': 'scatter'
-        }
-    }
-    event = {
-        'queryStringParameters': {
-            'category': 'frontend',
-            'type': 'time-series'
-        }
-    }
+    # event = {
+    #     'queryStringParameters': {
+    #         'category': 'frontend',
+    #         'type': 'scatter'
+    #     }
+    # }
+    # event = {
+    #     'queryStringParameters': {
+    #         'category': 'frontend',
+    #         'type': 'time-series'
+    #     }
+    # }
     pprint.pprint(handler(event, None))
