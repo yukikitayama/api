@@ -172,6 +172,23 @@ def compute_growth_and_popularity(df: pd.DataFrame, tags: List[str]):
     return data
 
 
+def make_time_series(df):
+    df['proportion'] = df['proportion'].round(ROUND)
+    df = df.set_index(['index', 'tag'])
+    df = df.unstack(level=-1)
+    df = df.reset_index(drop=False)
+    
+    columns = []
+    for column in df.columns:
+        if 'index' in column:
+          columns.append('index')
+        else:
+          columns.append(column[1])
+    df.columns = columns
+
+    return df.to_dict(orient='records')
+
+
 def handler(event, context):
     
     # Get query parameters
@@ -198,16 +215,10 @@ def handler(event, context):
     df = get_data(tags=tags)
     
     if type_ == 'time-series':
-        
-        body = []
-        for _, row in df.iterrows():
-            body.append({
-                'index': row['index'],
-                'tag': row['tag'],
-                'proportion': round(row['proportion'], ROUND)
-            })
+
+        body = make_time_series(df)
         body = json.dumps(body)
-    
+
     # Apply analytics         
     elif type_ == 'scatter':
         
@@ -231,27 +242,27 @@ def handler(event, context):
 
 
 if __name__ == '__main__':
-    # event = {
-    #     'queryStringParameters': {
-    #         'category': 'programming-language',
-    #         'type': 'time-series'
-    #     }
-    # }
-    # event = {
-    #     'queryStringParameters': {
-    #         'category': 'database',
-    #         'type': 'time-series'
-    #     }
-    # }
     event = {
         'queryStringParameters': {
             'category': 'programming-language',
-            'type': 'scatter'
+            'type': 'time-series'
         }
     }
     # event = {
     #     'queryStringParameters': {
     #         'category': 'database',
+    #         'type': 'time-series'
+    #     }
+    # }
+    # event = {
+    #     'queryStringParameters': {
+    #         'category': 'programming-language',
+    #         'type': 'scatter'
+    #     }
+    # }
+    # event = {
+    #     'queryStringParameters': {
+    #         'category': 'database',
     #         'type': 'scatter'
     #     }
     # }
@@ -267,4 +278,5 @@ if __name__ == '__main__':
     #         'type': 'time-series'
     #     }
     # }
+    # handler(event, None)
     pprint.pprint(handler(event, None))
