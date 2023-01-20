@@ -18,25 +18,45 @@ EXPIRE_SECOND_REDIS = 60 * 60 * 24 * 7  # 1 week
 FILENAME ='./yuki-kitayama-api.json'
 CATEGORY_TO_TAGS = {
     'programming-language': [
-        'python', 'javascript', 'typescript',
-        'java', 'c++', 'c#', 
+        'python', 
+        'javascript', 
+        'typescript',
+        'java', 
+        # 'c++', 
+        # 'c#', 
         # 'go',
-        'scala',
-        'r',
+        # 'scala',
+        # 'r',
         # 'kotlin', 
         # 'ruby',
         # 'swift',
         'dart'
     ],
     'frontend': [
-        'reactjs', 'angular', 'vue.js',
-        'next.js', 'flutter', 'react-native',
-        'django', 'gatsby'
+        'reactjs', 
+        'angular', 
+        # 'vue.js',
+        'next.js', 
+        'flutter', 
+        'react-native',
+        # 'django', 
+        # 'gatsby'
     ],
     'database': [
-        'mongodb', 'redis', 'cassandra', 
-        'google-bigquery', 'amazon-dynamodb', 'amazon-redshift', 
-        'snowflake-cloud-data-platform'
+        'mongodb', 
+        'redis', 
+        'cassandra', 
+        'google-bigquery', 
+        # 'amazon-dynamodb', 
+        'amazon-redshift', 
+        # 'snowflake-cloud-data-platform'
+    ],
+    'backend': [
+        'amazon-web-services',
+        'google-cloud-platform',
+        'azure',
+        'node.js',
+        'docker'
     ]
 }
 YEAR = 5
@@ -201,9 +221,7 @@ def handler(event, context):
     # Return the cache if it exists in Redis
     cache = r.get(f'api:analytics:tech:{category}:{type_}')
     if cache:
-        
         print('Return the cached data')
-        
         return {
             'statusCode': 200,
             'headers': {'Access-Control-Allow-Origin': '*'},
@@ -278,5 +296,11 @@ if __name__ == '__main__':
     #         'type': 'time-series'
     #     }
     # }
+    event = {
+        'queryStringParameters': {
+            'category': 'backend',
+            'type': 'scatter'
+        }
+    }
     # handler(event, None)
     pprint.pprint(handler(event, None))
