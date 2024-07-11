@@ -2,3 +2,5 @@ env/
 lambda/*/*.zip
 lambda/*/package
 yuki-kitayama-api.json
+
+nodejs-express/node_modules
