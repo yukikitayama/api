@@ -45,11 +45,22 @@ app.use((req, res, next) => {
 `npm install`
 ```
 --save express
+--save mongoose
 --save-dev nodemon
 (--save body-parser)
 ```
 
 `package.json`, `"scripts": {"start": "nodemon app.js"}`.
+
+Deployment
+
+- Creat Docker image of Node.js/Express API
+- Create Kubernetes Deployment of the Docker image and deploy to Kubernetes
+  - Set small `limits` and `requests` in `resources`
+- Create Kubernetes Service for the deployment and deploy to Kubernetes
+- Create Kubernetes Ingress, define path for the API, and deploy to Kubernetes
+- Set up HTTPS between client and load balancer.
+- Details: https://github.com/yukikitayama/kubernetes/tree/main
 
 ## Resource
 
