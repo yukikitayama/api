@@ -1,0 +1,20 @@
+# https://cloud.google.com/kubernetes-engine/docs/tutorials/http-balancer#creating_an_ingress_resource
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: webapp-ingress
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: ingress-global-ip
+    networking.gke.io/managed-certificates: managed-cert
+    ingressClassName: "gce"
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: nodejs-express-service
+            port:
+              number: 8080
