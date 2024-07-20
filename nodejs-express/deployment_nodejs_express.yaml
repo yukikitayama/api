@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nodejs-express-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nodejs-express
+  template:
+    metadata:
+      labels:
+        app: nodejs-express
+    spec:
+      containers:
+      - name: nodejs-express
+        image: us-west2-docker.pkg.dev/yukikitayama-com/api/nodejs-express
+        ports:
+        - containerPort: 8080
+        resources:
+          limits:
+            cpu: "10m"
+            memory: "10Mi"
+          requests:
+            cpu: "10m"
+            memory: "10Mi"
