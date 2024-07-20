@@ -46,6 +46,7 @@ app.use((req, res, next) => {
 ```
 --save express
 --save mongoose
+dotenv
 --save-dev nodemon
 (--save body-parser)
 ```
@@ -65,3 +66,4 @@ Deployment
 ## Resource
 
 - https://academind.com/tutorials/building-a-restful-api-with-nodejs
+- https://medium.com/@shital.pimpale5/how-to-store-password-and-credentials-in-nodejs-application-fd6420e4db6c
