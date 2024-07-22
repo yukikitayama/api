@@ -51,7 +51,7 @@ dotenv
 (--save body-parser)
 ```
 
-`package.json`, `"scripts": {"start": "nodemon app.js"}`.
+nodemon, `package.json`, `"scripts": {"start": "nodemon app.js"}`.
 
 Deployment
 
