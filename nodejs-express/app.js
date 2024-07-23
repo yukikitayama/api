@@ -6,6 +6,7 @@ require("dotenv").config();
 const mongodbSrv = process.env.MONGODB_SRV;
 
 const codingRoutes = require("./routes/coding");
+const authRoutes = require("./routes/auth");
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use((req, res, next) => {
 });
 
 app.use("/coding", codingRoutes);
+app.use("/auth", authRoutes);
 
 mongoose
   .connect(mongodbSrv)

@@ -32,6 +32,26 @@ app.use((req, res, next) => {
 });
 ```
 
+## Authentication
+
+**RESRful API is stateless**. Client sends auth data to server. Server sends token to client. Token is stored in client storage like browser. Stored token is sent to authorize subsequent request.
+
+**Token** is JSON data plus signature. It's **JSON Web Token (JWT)**. This can be verified by server via secret key.
+
+Encryption and decryption
+
+```
+const bcrypt = require("bcryptjs");
+
+// Encryption
+bcrypt.hash(process.env.PASSWORD, 12).then((hashedPw) => {
+  console.log(hashedPw);
+});
+
+// Decryption
+bcrypt.compare(notHashedPassword, hashedPassword);
+```
+
 ## Tool
 
 - Postman
@@ -48,10 +68,11 @@ app.use((req, res, next) => {
 --save mongoose
 dotenv
 --save-dev nodemon
+--save bcryptjs
 (--save body-parser)
 ```
 
-nodemon, `package.json`, `"scripts": {"start": "nodemon app.js"}`.
+nodemon, `package.json`, from `"scripts": {"start": "node app.js"}` to `"scripts": {"start": "nodemon app.js"}`.
 
 Deployment
 
