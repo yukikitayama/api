@@ -52,6 +52,8 @@ bcrypt.hash(process.env.PASSWORD, 12).then((hashedPw) => {
 bcrypt.compare(notHashedPassword, hashedPassword);
 ```
 
+User `jsonwebtoken` package.
+
 ## Tool
 
 - Postman
@@ -69,6 +71,7 @@ bcrypt.compare(notHashedPassword, hashedPassword);
 dotenv
 --save-dev nodemon
 --save bcryptjs
+--save jsonwebtoken
 (--save body-parser)
 ```
 

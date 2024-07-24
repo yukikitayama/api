@@ -1,5 +1,6 @@
 const User = require("../models/user");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 exports.login = (req, res, next) => {
   const email = req.body.email;
@@ -16,13 +17,22 @@ exports.login = (req, res, next) => {
       loadedUser = user;
       return bcrypt.compare(password, user.password);
     })
-    .then(isEqual => {
+    .then((isEqual) => {
       if (!isEqual) {
         const error = new Error("Wrong password");
         error.statusCode = 401;
         throw error;
       }
-      
+      // Create a signature
+      const token = jwt.sign(
+        {
+          email: loadedUser.email,
+          userId: loadedUser._id.toString(),
+        },
+        process.env.JWT_SIGN_SECRET,
+        { expiresIn: "1h" }
+      );
+      res.status(200).json({ token: token, userId: loadedUser._id.toString() });
     })
     .catch((err) => {
       if (!err.statusCode) {

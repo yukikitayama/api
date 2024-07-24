@@ -11,7 +11,7 @@ const userSchema = new Schema({
     required: true,
   },
   name: {
-    tyope: String,
+    type: String,
     required: true,
   },
 });
