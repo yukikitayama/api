@@ -17,4 +17,9 @@ const userSchema = new Schema({
 });
 
 // MongoDB collection
-module.exports = mongoose.model("user", userSchema);
+// module.exports = mongoose.model("user", userSchema);
+
+const conn = mongoose.createConnection(
+  `${process.env.MONGODB_SRV}/authentication`
+);
+module.exports = conn.model("user", userSchema);

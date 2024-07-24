@@ -24,4 +24,7 @@ const logSchema = new Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Log", logSchema);
+// module.exports = mongoose.model("Log", logSchema);
+
+const conn = mongoose.createConnection(`${process.env.MONGODB_SRV}/coding`);
+module.exports = conn.model("logs", logSchema);

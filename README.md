@@ -54,6 +54,11 @@ bcrypt.compare(notHashedPassword, hashedPassword);
 
 User `jsonwebtoken` package.
 
+## Mongoose
+
+- Multiple databases with Mongoose
+  - https://stackoverflow.com/questions/19474712/mongoose-and-multiple-database-in-single-node-js-project
+
 ## Tool
 
 - Postman
