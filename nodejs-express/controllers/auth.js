@@ -30,7 +30,7 @@ exports.login = (req, res, next) => {
           userId: loadedUser._id.toString(),
         },
         process.env.JWT_SIGN_SECRET,
-        { expiresIn: "1h" }
+        { expiresIn: process.env.JWT_SIGN_EXPIRESIN }
       );
       res.status(200).json({ token: token, userId: loadedUser._id.toString() });
     })

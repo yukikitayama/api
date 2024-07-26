@@ -22,4 +22,5 @@ const userSchema = new Schema({
 const conn = mongoose.createConnection(
   `${process.env.MONGODB_SRV}/authentication`
 );
-module.exports = conn.model("user", userSchema);
+// Mongoose better to use lowercase plural
+module.exports = conn.model("users", userSchema);

@@ -34,6 +34,8 @@ app.use((req, res, next) => {
 
 ## Authentication
 
+Authentication is needed if contentn should be **protected**.
+
 **RESRful API is stateless**. Client sends auth data to server. Server sends token to client. Token is stored in client storage like browser. Stored token is sent to authorize subsequent request.
 
 **Token** is JSON data plus signature. It's **JSON Web Token (JWT)**. This can be verified by server via secret key.
@@ -58,6 +60,8 @@ User `jsonwebtoken` package.
 
 - Multiple databases with Mongoose
   - https://stackoverflow.com/questions/19474712/mongoose-and-multiple-database-in-single-node-js-project
+- By default, Mongoose automatically looks for the plural, lowercased version of your model name. **Model is collection in the database**.
+  - https://mongoosejs.com/docs/models.html#compiling
 
 ## Tool
 

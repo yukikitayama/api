@@ -1,6 +1,7 @@
 const express = require('express');
 
 const codingController = require('../controllers/coding');
+const isAuth = require("../middleware/is-auth");
 
 const router = express.Router();
 
@@ -8,6 +9,6 @@ const router = express.Router();
 router.get('/logs', codingController.getLogs);
 
 // POST /coding/log
-router.post('/log', codingController.postLog);
+router.post('/log', isAuth, codingController.postLog);
 
 module.exports = router;

@@ -27,4 +27,5 @@ const logSchema = new Schema(
 // module.exports = mongoose.model("Log", logSchema);
 
 const conn = mongoose.createConnection(`${process.env.MONGODB_SRV}/coding`);
+// Mongoose better to use lowercase plural
 module.exports = conn.model("logs", logSchema);
