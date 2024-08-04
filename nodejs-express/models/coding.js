@@ -15,7 +15,7 @@ const logSchema = new Schema(
     firstTime: { type: Number },
     optimized: { type: Number },
     sawSolution: { type: Number },
-    newReview: { type: Number },
+    needReview: { type: Number },
     noEditorial: { type: Number },
     goodProblem: { type: Number },
     comment: { type: String },

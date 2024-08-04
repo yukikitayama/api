@@ -7,6 +7,7 @@ const mongodbSrv = process.env.MONGODB_SRV;
 
 const codingRoutes = require("./routes/coding");
 const authRoutes = require("./routes/auth");
+const musicRoutes = require("./routes/music");
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.use((req, res, next) => {
 
 app.use("/coding", codingRoutes);
 app.use("/auth", authRoutes);
+app.use("/music", musicRoutes);
 
 mongoose
   .connect(mongodbSrv)
