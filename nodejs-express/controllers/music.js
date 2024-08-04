@@ -2,6 +2,7 @@ const Music = require("../models/music");
 
 exports.getPerformances = (req, res, next) => {
   Music.find()
+    .sort({ date: "desc", title: "asc" })
     .then((performances) => {
       res.status(200).json({
         performances: performances,
