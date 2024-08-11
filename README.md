@@ -96,6 +96,14 @@ Deployment
 - Set up HTTPS between client and load balancer.
 - Details: https://github.com/yukikitayama/kubernetes/tree/main
 
+`module.exports`
+
+https://www.sitepoint.com/understanding-module-exports-exports-node-js/
+
+`express.Router`
+
+https://expressjs.com/en/guide/routing.html
+
 ## Resource
 
 - https://academind.com/tutorials/building-a-restful-api-with-nodejs
