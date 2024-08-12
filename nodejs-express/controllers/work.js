@@ -14,10 +14,21 @@ exports.getCertifications = (req, res, next) => {
 exports.getLearnings = (req, res, next) => {
   Work.learning
     .find()
-    .sort({ date: "desc", name: "asc" })
+    .sort({ startDate: "desc", name: "asc" })
     .then((learnings) => {
       res.status(200).json({
         learnings: learnings,
+      });
+    });
+};
+
+exports.getProjects = (req, res, next) => {
+  Work.project
+    .find()
+    .sort({ startDate: "desc", name: "asc" })
+    .then((projects) => {
+      res.status(200).json({
+        projects: projects,
       });
     });
 };
