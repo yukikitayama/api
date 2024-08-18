@@ -9,6 +9,8 @@ const codingRoutes = require("./routes/coding");
 const authRoutes = require("./routes/auth");
 const musicRoutes = require("./routes/music");
 const workRoutes = require("./routes/work");
+const tennisRoutes = require("./routes/tennis");
+const assetRoutes = require("./routes/asset");
 
 const app = express();
 
@@ -31,6 +33,8 @@ app.use("/coding", codingRoutes);
 app.use("/auth", authRoutes);
 app.use("/music", musicRoutes);
 app.use("/work", workRoutes);
+app.use("/tennis", tennisRoutes);
+app.use("/asset", assetRoutes);
 
 mongoose
   .connect(mongodbSrv)
